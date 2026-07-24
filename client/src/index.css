@@ -1,0 +1,147 @@
+/* ─── Google Fonts ─── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Global typography ─── */
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900;
+    overflow-x: hidden;
+  }
+
+  * {
+    box-sizing: border-box;
+    min-width: 0; /* prevents flex/grid children from overflowing */
+  }
+}
+
+/* ─── Custom utilities ─── */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Mobile touch improvements */
+  .touch-action-manipulation {
+    touch-action: manipulation;
+  }
+}
+
+/* ─── Smooth transitions ─── */
+* {
+  transition-property: background-color, border-color, color;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+
+/* ─── Mobile table scroll ─── */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Dark Mode Global Overrides ─── */
+html.dark body {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+html.dark .bg-slate-100 {
+  background-color: #0f172a !important;
+}
+html.dark .bg-white {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+html.dark .text-slate-800, html.dark .text-slate-700 {
+  color: #f1f5f9 !important;
+}
+html.dark .text-slate-600, html.dark .text-slate-500, html.dark .text-slate-400 {
+  color: #94a3b8 !important;
+}
+html.dark .border-slate-100, html.dark .border-slate-200, html.dark .border-slate-200\/80, html.dark .border-slate-100\/80 {
+  border-color: #334155 !important;
+}
+html.dark .bg-slate-50 {
+  background-color: #111827 !important;
+}
+html.dark input, html.dark select, html.dark textarea {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+html.dark input::placeholder {
+  color: #475569 !important;
+}
+html.dark .bg-slate-50\/50 {
+  background-color: rgba(17, 24, 39, 0.5) !important;
+}
+html.dark .hover\:bg-slate-50:hover {
+  background-color: #1e293b !important;
+}
+html.dark .bg-indigo-50 {
+  background-color: rgba(99, 102, 241, 0.15) !important;
+}
+html.dark .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+}
+html.dark .bg-rose-50 {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+}
+html.dark .bg-amber-50 {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+}
+html.dark .border-rose-100 {
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+html.dark .border-indigo-100 {
+  border-color: rgba(99, 102, 241, 0.3) !important;
+}
+html.dark .border-emerald-100 {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+/* ─── Mobile responsive fixes ─── */
+@media (max-width: 640px) {
+  /* Main content padding */
+  main {
+    padding: 0.875rem !important;
+  }
+
+  /* Tables scroll horizontally */
+  table {
+    min-width: 500px;
+  }
+
+  /* Ensure text doesn't overflow cards */
+  .truncate {
+    max-width: 100%;
+  }
+}
+
+/* ─── iOS safe area / notch support ─── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  /* Bottom sheet modals (items-end) get safe padding */
+  .fixed.inset-0 > div:last-child {
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* ─── Better touch targets ─── */
+@media (max-width: 768px) {
+  button, a[role="button"] {
+    min-height: 38px;
+  }
+}

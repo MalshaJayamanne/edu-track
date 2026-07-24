@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SEO -->
+    <title>EduTrack AI | Smart Academic Manager</title>
+    <meta name="description" content="EduTrack AI is your personal AI-powered academic management system. Track subjects, assignments, timetables, notes and analytics — all in one place." />
+    <meta name="theme-color" content="#1e40af" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="EduTrack AI" />
+    <meta property="og:description" content="Your smart academic companion. Track grades, subjects and assignments with AI." />
+    <meta property="og:type" content="website" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>" />
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <style>
+      /* Apply Inter globally before React mounts */
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html { font-family: 'Inter', system-ui, sans-serif; }
+      body { background: #f8fafc; }
+
+      /* Prevent invisible flash while JS loads */
+      #root:empty::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
