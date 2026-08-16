@@ -10,6 +10,7 @@ import QuickActions from "../components/dashboard/QuickActions";
 import InsightCard from "../components/dashboard/InsightCard";
 import RecentSubjects from "../components/dashboard/RecentSubjects";
 import { useWindowSize } from "../hooks/useWindowSize";
+import { DashboardSkeleton } from "../components/ui/Skeleton";
 
 const API = "http://localhost:5000/api/dashboard";
 
@@ -113,12 +114,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="h-[60vh] flex items-center justify-center">
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-            <p className="text-slate-400 text-sm">Loading your dashboard...</p>
-          </div>
-        </div>
+        <DashboardSkeleton />
       </DashboardLayout>
     );
   }

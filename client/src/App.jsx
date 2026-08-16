@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import { useAuth } from "./context/AuthContext";
 
 import Login from "./pages/auth/Login";
@@ -45,6 +46,15 @@ function App() {
 
   return (
     <BrowserRouter>
+      <Toaster 
+        position="top-right" 
+        toastOptions={{ 
+          duration: 4000,
+          style: {
+            maxWidth: '90vw'
+          }
+        }} 
+      />
       <Routes>
 
         {/* PUBLIC HOME */}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
+import PageWrapper from "../ui/PageWrapper";
 
 export default function DashboardLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -57,7 +58,9 @@ export default function DashboardLayout({ children }) {
         />
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          {children}
+          <PageWrapper>
+            {children}
+          </PageWrapper>
         </main>
       </div>
     </div>

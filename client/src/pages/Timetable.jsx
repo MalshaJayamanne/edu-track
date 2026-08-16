@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import DashboardLayout from "../components/layout/DashboardLayout";
+import { showToast } from "../utils/toast";
 
 const API = "http://localhost:5000/api/timetable";
 
@@ -48,29 +49,41 @@ export default function Timetable() {
 
   const addSlot = async () => {
     if (!form.subject || !form.startTime || !form.endTime) {
-      setError("Subject, Start Time and End Time are required.");
+      const msg = "Subject, Start Time and End Time are required.";
+      setError(msg);
+      showToast.error(msg);
       return;
     }
     if (form.startTime >= form.endTime) {
-      setError("End time must be after start time.");
+      const msg = "End time must be after start time.";
+      setError(msg);
+      showToast.error(msg);
       return;
     }
     try {
       setError(null);
       setSaving(true);
       await axios.post(API, form, { withCredentials: true });
+      showToast.success("Timetable slot added!");
       setForm(EMPTY_FORM);
       await fetchSlots();
     } catch (e) {
-      setError(e.response?.data?.message || "Failed to add slot.");
+      const msg = e.response?.data?.message || "Failed to add slot.";
+      setError(msg);
+      showToast.error(msg);
     } finally {
       setSaving(false);
     }
   };
 
   const deleteSlot = async (id) => {
-    await axios.delete(`${API}/${id}`, { withCredentials: true });
-    fetchSlots();
+    try {
+      await axios.delete(`${API}/${id}`, { withCredentials: true });
+      showToast.success("Slot removed");
+      fetchSlots();
+    } catch (e) {
+      showToast.error("Failed to remove slot");
+    }
   };
 
   // ===== EDIT MODE =====
@@ -98,20 +111,25 @@ export default function Timetable() {
   const saveEdit = async (id) => {
     if (!editForm.subject || !editForm.startTime || !editForm.endTime) {
       setEditError("Subject, Start and End are required.");
+      showToast.error("Subject, Start and End are required.");
       return;
     }
     if (editForm.startTime >= editForm.endTime) {
       setEditError("End time must be after start time.");
+      showToast.error("End time must be after start time.");
       return;
     }
     try {
       setEditError(null);
       setEditSaving(true);
       await axios.put(`${API}/${id}`, editForm, { withCredentials: true });
+      showToast.success("Slot updated!");
       setEditingId(null);
       await fetchSlots();
     } catch (e) {
-      setEditError(e.response?.data?.message || "Failed to update slot.");
+      const msg = e.response?.data?.message || "Failed to update slot.";
+      setEditError(msg);
+      showToast.error(msg);
     } finally {
       setEditSaving(false);
     }
