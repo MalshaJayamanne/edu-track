@@ -418,7 +418,12 @@ Integrate AI capabilities, restructure the platform with semester-wise data isol
 Todo list
 
 NEW CHANGES:
-Consistency on UI
+
+✔ Custom Premium Site Logo & Branding Integration
+✔ Continuous Single-Page GPA PDF Transcript Export
+
+Dark Mode Fine-Tuning
+Exam Countdown & Pomodoro Study Timer
 new advance features
 
 deploy on render/netlify/ Railway

@@ -4,6 +4,9 @@ import DashboardLayout from "../components/layout/DashboardLayout";
 import MarkdownMessage from "../components/chat/MarkdownMessage";
 import AIErrorBanner from "../components/common/AIErrorBanner";
 import { useAuth } from "../context/AuthContext";
+import { NotesSkeleton } from "../components/ui/Skeleton";
+import EmptyState from "../components/ui/EmptyState";
+import { showToast } from "../utils/toast";
 
 const API = "http://localhost:5000/api/notes";
 
@@ -57,20 +60,31 @@ export default function Notes() {
   };
 
   const addNote = async () => {
-    if (!form.title || !form.content) return;
+    if (!form.title || !form.content) {
+      showToast.error("Title and Content are required.");
+      return;
+    }
     try {
       const res = await axios.post(API, form, { withCredentials: true });
       setNotes((prev) => [res.data, ...prev]);
+      showToast.success("Note saved!");
       resetForm();
-    } catch (err) { console.log(err); }
+    } catch (err) { 
+      console.log(err);
+      showToast.error("Failed to save note.");
+    }
   };
 
   const updateNote = async () => {
     try {
       const res = await axios.put(`${API}/${editing._id}`, form, { withCredentials: true });
       setNotes((prev) => prev.map((n) => n._id === editing._id ? res.data : n));
+      showToast.success("Note updated!");
       resetForm();
-    } catch (err) { console.log(err); }
+    } catch (err) { 
+      console.log(err); 
+      showToast.error("Failed to update note.");
+    }
   };
 
   const deleteNote = async (id) => {
@@ -78,13 +92,18 @@ export default function Notes() {
     try {
       await axios.delete(`${API}/${id}`, { withCredentials: true });
       setNotes((prev) => prev.filter((n) => n._id !== id));
-    } catch (err) { console.log(err); }
+      showToast.success("Note deleted");
+    } catch (err) { 
+      console.log(err); 
+      showToast.error("Failed to delete note.");
+    }
   };
 
   const togglePin = async (note) => {
     try {
       const res = await axios.put(`${API}/${note._id}`, { pinned: !note.pinned }, { withCredentials: true });
       setNotes((prev) => prev.map((n) => n._id === note._id ? res.data : n));
+      showToast.info(note.pinned ? "Note unpinned" : "Note pinned ⭐");
     } catch (err) { console.log(err); }
   };
 
@@ -97,6 +116,7 @@ export default function Notes() {
   // ── AI actions ──
   const triggerAI = async (noteId, type) => {
     if (user?.aiCredits === 0) {
+      showToast.aiCreditWarning();
       setAiMode({ noteId, type });
       setAiResult({
         error: "Your AI credits have finished. Please refill your credits in Settings.",
@@ -112,10 +132,11 @@ export default function Notes() {
       const endpoint = type === "summary" ? "summarize" : type === "mcq" ? "mcqs" : "flashcards";
       const res = await axios.post(`${API}/${noteId}/${endpoint}`, {}, { withCredentials: true });
       setAiResult(res.data);
+      showToast.success(`AI ${type === "summary" ? "Summary" : type === "mcq" ? "MCQs" : "Flashcards"} ready!`);
     } catch (err) {
-      setAiResult({
-        error: err.response?.data?.message || "AI generation failed. Make sure the note has content.",
-      });
+      const msg = err.response?.data?.message || "AI generation failed. Make sure the note has content.";
+      setAiResult({ error: msg });
+      showToast.error(msg);
     } finally {
       setAiLoading(false);
       reloadUser();
@@ -283,14 +304,15 @@ export default function Notes() {
 
       {/* ===== NOTE CARDS ===== */}
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin h-8 w-8 rounded-full border-4 border-indigo-600 border-t-transparent" />
-        </div>
+        <NotesSkeleton count={6} />
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16 bg-white border border-dashed border-slate-200 rounded-2xl">
-          <div className="text-4xl mb-3">📝</div>
-          <p className="text-slate-500 font-medium">No notes found</p>
-        </div>
+        <EmptyState
+          type="notes"
+          title={search ? "No matching notes" : "No notes added yet"}
+          description={search ? `No notes matched your search query "${search}".` : "Organize your study material, lecture highlights, and code snippets."}
+          actionLabel={search ? undefined : "Create First Note"}
+          onAction={search ? undefined : () => setShowModal(true)}
+        />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filtered.map((note) => {

@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import DashboardLayout from "../components/layout/DashboardLayout";
+import { SubjectSkeleton } from "../components/ui/Skeleton";
+import EmptyState from "../components/ui/EmptyState";
+import { showToast } from "../utils/toast";
 
 const RISK_CFG = {
   High:   { bg: "bg-rose-50",    text: "text-rose-600",   border: "border-rose-200",   label: "High Risk" },
@@ -91,13 +94,16 @@ export default function Subjects() {
         gradePoint: form.grade === "Ongoing" ? 0 : (GRADE_POINTS[form.grade] ?? 0),
       };
       await axios.post(API, payload, { withCredentials: true });
+      showToast.success("Subject added successfully!");
       fetchSubjects();
       resetForm();
       setShowModal(false);
     } catch (err) {
       console.error(err);
       const backendErr = err.response?.data?.errors?.join(", ") || err.response?.data?.message;
-      setError(backendErr || "Failed to create subject. Ensure all fields are filled.");
+      const msg = backendErr || "Failed to create subject. Ensure all fields are filled.";
+      setError(msg);
+      showToast.error(msg);
     }
   };
 
@@ -112,12 +118,14 @@ export default function Subjects() {
       await axios.put(`${API}/${editingId}`, payload, {
         withCredentials: true,
       });
+      showToast.success("Subject updated!");
       fetchSubjects();
       resetForm();
       setShowModal(false);
     } catch (err) {
       console.error(err);
       setError("Failed to update subject.");
+      showToast.error("Failed to update subject.");
     }
   };
 
@@ -127,9 +135,11 @@ export default function Subjects() {
       await axios.delete(`${API}/${id}`, {
         withCredentials: true,
       });
+      showToast.success("Subject deleted");
       fetchSubjects();
     } catch (err) {
       console.error(err);
+      showToast.error("Failed to delete subject.");
     }
   };
 
@@ -200,31 +210,32 @@ export default function Subjects() {
 
       {/* LOADING */}
       {loading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-600"></div>
-        </div>
+        <SubjectSkeleton count={6} />
       ) : subjects.length === 0 ? (
-        <div className="text-center py-16 bg-white border border-slate-200/60 rounded-2xl shadow-sm max-w-lg mx-auto">
-          <div className="text-4xl mb-3">📚</div>
-          <p className="text-slate-500 font-medium mb-4">No subjects registered yet.</p>
-          <button
-            onClick={() => {
-              resetForm();
-              setShowModal(true);
-            }}
-            className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 font-semibold text-sm px-4 py-2 rounded-xl transition-all"
-          >
-            Add Your First Subject
-          </button>
-        </div>
+        <EmptyState
+          type="subjects"
+          title="No subjects registered yet"
+          description="Start building your academic portfolio by adding your enrolled subjects."
+          actionLabel="Add Your First Subject"
+          onAction={() => {
+            resetForm();
+            setShowModal(true);
+          }}
+        />
       ) : (
         /* GRID */
         filteredSubjects.length === 0 ? (
-          <div className="text-center py-16 bg-white border border-slate-200/60 rounded-2xl shadow-sm max-w-lg mx-auto">
-            <div className="text-4xl mb-3">🔍</div>
-            <p className="text-slate-500 font-medium mb-1">No subjects in Semester {currentSem}</p>
-            <p className="text-slate-400 text-xs">Switch semester filter or add subjects for this semester.</p>
-          </div>
+          <EmptyState
+            type="subjects"
+            title={`No subjects in Semester ${currentSem}`}
+            description="You don't have any subjects listed under this semester filter."
+            actionLabel="Add Subject for this Semester"
+            onAction={() => {
+              resetForm();
+              setForm(f => ({ ...f, semester: currentSem === "all" ? "1" : currentSem }));
+              setShowModal(true);
+            }}
+          />
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredSubjects.map((sub) => {

@@ -2,13 +2,15 @@ import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import { useWindowSize } from "../hooks/useWindowSize";
+import AcademicReportModal from "../components/ui/AcademicReportModal";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line, CartesianGrid,
 } from "recharts";
 
-const API_GPA      = "http://localhost:5000/api/gpa";
-const API_SUBJECTS = "http://localhost:5000/api/subjects";
+const API_GPA         = "http://localhost:5000/api/gpa";
+const API_SUBJECTS    = "http://localhost:5000/api/subjects";
+const API_ASSIGNMENTS = "http://localhost:5000/api/assignments";
 
 const GRADE_POINTS = {
   "A+": 4.0, A: 4.0, "A-": 3.7,
@@ -57,11 +59,13 @@ function GpaRing({ value, max = 4.0, size = 120 }) {
 }
 
 export default function GPA() {
-  const [gpaData, setGpaData]     = useState(null);
-  const [subjects, setSubjects]   = useState([]);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState(null);
-  const [activeSem, setActiveSem] = useState(null);
+  const [gpaData, setGpaData]         = useState(null);
+  const [subjects, setSubjects]       = useState([]);
+  const [assignments, setAssignments] = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState(null);
+  const [activeSem, setActiveSem]     = useState(null);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const { isMobile } = useWindowSize();
 
   // Responsive chart values
@@ -85,14 +89,16 @@ export default function GPA() {
     try {
       setLoading(true);
       setError(null);
-      const [gpaRes, subRes] = await Promise.all([
+      const [gpaRes, subRes, asgRes] = await Promise.all([
         axios.get(API_GPA, { withCredentials: true }),
         axios.get(API_SUBJECTS, { withCredentials: true }),
+        axios.get(API_ASSIGNMENTS, { withCredentials: true }).catch(() => ({ data: [] })),
       ]);
       const gData = gpaRes.data;
       const sData = subRes.data;
       setGpaData(gData);
       setSubjects(sData);
+      setAssignments(asgRes.data || []);
 
       // Auto-detect: set active tab to first semester
       if (!activeSem && gData.semesterBreakdown?.length > 0) {
@@ -187,19 +193,30 @@ export default function GPA() {
           <p className="text-slate-500 text-sm mt-1">Multi-semester academic performance analytics</p>
         </div>
 
-        {/* Current Semester Badge */}
-        <div className="flex items-center gap-2 sm:gap-3 bg-indigo-50 border border-indigo-100 rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 self-start sm:self-auto">
-          <span className="text-sm font-semibold text-slate-600 whitespace-nowrap">📍 Current Sem:</span>
-          <select
-            value={currentSem ?? ""}
-            onChange={(e) => handleSetCurrentSem(Number(e.target.value))}
-            className="text-sm font-bold text-indigo-700 bg-transparent border-none outline-none cursor-pointer"
+        <div className="flex flex-wrap items-center gap-3 self-start sm:self-auto">
+          {/* Export PDF Report Button */}
+          <button
+            onClick={() => setIsReportOpen(true)}
+            className="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 shadow-sm transition-all text-sm"
           >
-            {[1,2,3,4,5,6,7,8].map((s) => (
-              <option key={s} value={s}>Semester {s}</option>
-            ))}
-          </select>
-          <span className="text-xs text-emerald-600 font-semibold hidden sm:inline">✓ Auto-detected</span>
+            <span>📄</span>
+            <span>Export Report (PDF)</span>
+          </button>
+
+          {/* Current Semester Badge */}
+          <div className="flex items-center gap-2 sm:gap-3 bg-indigo-50 border border-indigo-100 rounded-xl px-3 sm:px-4 py-2 sm:py-2.5">
+            <span className="text-sm font-semibold text-slate-600 whitespace-nowrap">📍 Current Sem:</span>
+            <select
+              value={currentSem ?? ""}
+              onChange={(e) => handleSetCurrentSem(Number(e.target.value))}
+              className="text-sm font-bold text-indigo-700 bg-transparent border-none outline-none cursor-pointer"
+            >
+              {[1,2,3,4,5,6,7,8].map((s) => (
+                <option key={s} value={s}>Semester {s}</option>
+              ))}
+            </select>
+            <span className="text-xs text-emerald-600 font-semibold hidden sm:inline">✓ Auto-detected</span>
+          </div>
         </div>
       </div>
 
@@ -522,6 +539,15 @@ export default function GPA() {
           )}
         </div>
       </div>
+
+      {/* ===== ACADEMIC REPORT TRANSCRIPT MODAL ===== */}
+      <AcademicReportModal
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+        gpaData={gpaData}
+        subjects={subjects}
+        assignments={assignments}
+      />
     </DashboardLayout>
   );
 }

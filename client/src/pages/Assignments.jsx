@@ -4,6 +4,9 @@ import DashboardLayout from "../components/layout/DashboardLayout";
 import MarkdownMessage from "../components/chat/MarkdownMessage";
 import AIErrorBanner from "../components/common/AIErrorBanner";
 import { useAuth } from "../context/AuthContext";
+import { CardSkeleton } from "../components/ui/Skeleton";
+import EmptyState from "../components/ui/EmptyState";
+import { showToast } from "../utils/toast";
 
 const API = "http://localhost:5000/api/assignments";
 
@@ -54,16 +57,20 @@ export default function Assignments() {
   const handleSubmit = async () => {
     if (!form.title || !form.module || !form.dueDate) {
       setError("Title, Module and Due Date are required.");
+      showToast.error("Please fill in all required fields.");
       return;
     }
     try {
       setError(null);
       await axios.post(API, form, { withCredentials: true });
+      showToast.success("Assignment created!");
       setForm(EMPTY_FORM);
       setOpen(false);
       fetchData();
     } catch (e) {
-      setError(e.response?.data?.message || "Failed to create assignment.");
+      const msg = e.response?.data?.message || "Failed to create assignment.";
+      setError(msg);
+      showToast.error(msg);
     }
   };
 
@@ -74,12 +81,18 @@ export default function Assignments() {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this assignment?")) return;
-    await axios.delete(`${API}/${id}`, { withCredentials: true });
-    fetchData();
+    try {
+      await axios.delete(`${API}/${id}`, { withCredentials: true });
+      showToast.success("Assignment deleted");
+      fetchData();
+    } catch (e) {
+      showToast.error("Failed to delete assignment");
+    }
   };
 
   const fetchAIPrioritization = async () => {
     if (user?.aiCredits === 0) {
+      showToast.aiCreditWarning();
       setAiError("Your AI credits have finished. Please refill your credits in Settings.");
       setAiPanel(null);
       return;
@@ -89,8 +102,11 @@ export default function Assignments() {
       setAiError(null);
       const res = await axios.get(`${API}/ai-prioritization`, { withCredentials: true });
       setAiPanel(res.data);
+      showToast.success("AI prioritization plan generated!");
     } catch (e) {
-      setAiError(e.response?.data?.message || "Failed to generate AI prioritization. Please try again.");
+      const msg = e.response?.data?.message || "Failed to generate AI prioritization. Please try again.";
+      setAiError(msg);
+      showToast.error(msg);
       setAiPanel(null);
     } finally {
       setAiLoading(false);
@@ -213,22 +229,20 @@ export default function Assignments() {
 
       {/* ===== CARDS ===== */}
       {loading ? (
-        <div className="flex justify-center py-16">
-          <div className="flex flex-col items-center gap-3">
-            <div className="animate-spin h-10 w-10 rounded-full border-4 border-indigo-600 border-t-transparent" />
-            <p className="text-slate-400 text-sm">Loading assignments...</p>
-          </div>
+        <div className="grid md:grid-cols-2 gap-5">
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16 bg-white border border-dashed border-slate-200 rounded-2xl">
-          <div className="text-4xl mb-3">📋</div>
-          <p className="text-slate-500 font-medium mb-1">{filter === "All" ? "No assignments yet." : `No ${filter} assignments.`}</p>
-          {filter === "All" && (
-            <button onClick={() => setOpen(true)} className="mt-2 text-indigo-600 hover:text-indigo-700 text-sm font-semibold underline">
-              Add your first assignment
-            </button>
-          )}
-        </div>
+        <EmptyState
+          type="assignments"
+          title={filter === "All" ? "No assignments listed" : `No ${filter} assignments`}
+          description={filter === "All" ? "Keep track of your projects, quizzes, and homework deadlines." : `You currently have zero assignments with ${filter} status.`}
+          actionLabel={filter === "All" ? "Add Assignment" : undefined}
+          onAction={filter === "All" ? () => setOpen(true) : undefined}
+        />
       ) : (
         <div className="grid md:grid-cols-2 gap-5">
           {filtered.map((a) => {

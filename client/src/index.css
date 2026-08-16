@@ -145,3 +145,63 @@ html.dark .border-emerald-100 {
     min-height: 38px;
   }
 }
+
+/* ─── Print Stylesheet for Academic Report PDF Export ─── */
+@page {
+  margin: 12mm;
+  size: A4 portrait;
+}
+
+@media print {
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Hide navigation, sidebar, navbar, toasts, and action buttons */
+  nav, sidebar, header, .print\:hidden, aside, button, #toaster {
+    display: none !important;
+  }
+
+  /* Unclamp modal overlays & dialog boxes */
+  .fixed.inset-0, 
+  .fixed.inset-0 > div,
+  .printable-document {
+    position: static !important;
+    inset: auto !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Force tables to render all rows cleanly without scrollbars */
+  .overflow-x-auto {
+    overflow: visible !important;
+  }
+
+  /* Ensure text and borders are sharp in print */
+  * {
+    box-shadow: none !important;
+    color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Page break optimization */
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+  
+  tr, .mb-6, .mb-8 {
+    page-break-inside: avoid;
+  }
+}

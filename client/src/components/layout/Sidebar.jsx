@@ -129,10 +129,9 @@ export default function Sidebar({ collapsed, onToggle }) {
           <button
             onClick={onToggle}
             title={collapsed ? "Expand" : "Collapse"}
-            className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-            style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+            className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95 overflow-hidden"
           >
-            <span className="text-base">🎓</span>
+            <img src="/logo.png" className="w-full h-full object-cover rounded-xl" alt="Logo" />
           </button>
           {!collapsed && (
             <div className="overflow-hidden">
